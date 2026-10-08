@@ -6,25 +6,31 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useMemo } from "react";
-import { staticData, useStore } from "../state/store";
+import { cleanRowsForView, staticData, useStore } from "../state/store";
 import { DownloadButtons } from "./DownloadButtons";
 
 const DataTable: React.FC<{onSelect?: (row: any) => void}> = ({
   onSelect
 }) => {
-  const columns = staticData?.length ? Object.keys(staticData[0]).map(f => ({
+  const view = useStore((state) => state.view);
+
+  // id stays the staticData index so "download selected" maps back correctly
+  const data = useMemo(() => {
+    return cleanRowsForView(
+      view,
+      staticData.map((d: any, i: number) => {
+        return {
+          id: i,
+          ...d,
+        };
+      })
+    );
+  }, [view])
+
+  const columns = data.length ? Object.keys(data[0]).filter(f => f !== "id").map(f => ({
     field: f,
     headerName: f,
   })) : [];
-
-  const data = useMemo(() => {
-    return staticData.map((d: any, i: number) => {
-      return {
-        id: i,
-        ...d,
-      };
-    });
-  }, [])
 
   return (
     <div style={{ maxHeight: "80vh", overflowY: "auto", width: "100%" }}>
@@ -33,7 +39,7 @@ const DataTable: React.FC<{onSelect?: (row: any) => void}> = ({
         onRowSelectionModelChange={(params) => {
           onSelect && onSelect(params);
         }}
-        getRowId={(row) => row.id}
+        getRowId={(row) => row.id as number}
         columns={columns}
         initialState={{
           pagination: {
