@@ -8,6 +8,7 @@ import {
 } from "./filters";
 import * as d3 from "d3";
 import { END_YEAR, START_YEAR } from "../dates";
+import type { Geo } from "../utils/queries";
 
 const demographicFilterKeys = [
   "Median Household Income",
@@ -168,7 +169,7 @@ export const MapLayerOptions = mapLayers.map((layer) => layer.label);
 export const getMapConfig = (view: string): {
   layer: string;
   tileset: string;
-  endpoint: string;
+  geo: Geo;
   tileId: string;
   dataId: string;
   filterKeys?: string[];
@@ -178,7 +179,7 @@ export const getMapConfig = (view: string): {
   {
     layer: "Townships",
     tileset: "cpr2024.62lnnt0z",
-    endpoint: "6744f63adb91810008024959",
+    geo: "township",
     tileId: "MeridianTownshipRange",
     dataId: "MeridianTownshipRange",
     sortKeys: "MeridianTownshipRange",
@@ -190,7 +191,7 @@ export const getMapConfig = (view: string): {
   {
     layer: "Counties",
     tileset: "cpr2024.47ns3kc2",
-    endpoint: "674513830507860008cda249",
+    geo: "county",
     tileId: "GEOID",
     dataId: "FIPS",
     sortKeys: "Area Name",
@@ -203,7 +204,7 @@ export const getMapConfig = (view: string): {
   {
     layer: "School Districts",
     tileset: "cpr2024.5i4j8yha",
-    endpoint: "674518c90507860008cda24f",
+    geo: "school",
     tileId: "FIPS",
     dataId: "FIPS",
     filterKeys: view === 'map' ? mapKeys : demogViewKeys,
@@ -216,7 +217,7 @@ export const getMapConfig = (view: string): {
   {
     layer: "Tracts",
     tileset: "cpr2024.0n14fhc6",
-    endpoint: "6744f2bbdb91810008024956",
+    geo: "tract",
     tileId: "GEOID",
     dataId: "GEOID",
     filterKeys: view === 'map' ? mapKeys : demogViewKeys,
@@ -230,7 +231,7 @@ export const getMapConfig = (view: string): {
   {
     layer: "Sections",
     tileset: "cpr2024.atj2mdo6",
-    endpoint: "67451c010507860008cda252",
+    geo: "section",
     tileId: "CO_MTRS",
     dataId: "comtrs",
     sortKeys: "comtrs",
@@ -240,7 +241,7 @@ export const getMapConfig = (view: string): {
   {
     layer: "Zip Codes",
     tileset: "cpr2024.3w98sm2d",
-    endpoint: "674516220507860008cda24c",
+    geo: "zip",
     tileId: "ZCTA5CE20",
     dataId: "Zip Code",
     sortKeys: "Zip Code",

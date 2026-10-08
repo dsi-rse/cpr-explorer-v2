@@ -1,0 +1,7 @@
+# pnpm 11 no longer reads the "pnpm" field in package.json.
+# These packages ship prebuilt binaries; their install scripts aren't needed.
+allowBuilds:
+  esbuild: false
+  msgpackr-extract: false
+  sharp: false
+  workerd: false

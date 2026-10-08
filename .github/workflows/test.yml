@@ -1,53 +1,27 @@
-# action to run calpip_match_test.py
-# then update the readme with test_results.json
-# and commit both to the repo
-name: Test Production API
+# runs every nectr fixture query through src/utils/queries.ts against the data on R2
+name: Query parity
 
 on:
+  pull_request:
   workflow_dispatch:
 
 jobs:
-  test:
+  parity:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # Set up Python 3.9
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v3
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.9'
+          node-version: '22'
 
-      # Install dependencies
       - name: Install Dependencies
-        run: pip install -r scripts/requirements.txt
+        run: npm install -g pnpm && pnpm install --frozen-lockfile
 
-      # Run the test process
-      - name: Run Test
-        run: python scripts/tests/calpip-match-test.py
-
-      - name: Update years
-        run: python scripts/update-years.py
-
-      - name: install node
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-      - name: Install dependencies
-        run: npm i -g pnpm && pnpm install  
-
-      - name: build
-        run: pnpm build
-        
-      # Commit the results
-      - name: Commit Test Results
-        run: |
-          git config --local user.email "Updated test results"
-          git config --local user.name "github-actions"
-          git add .
-          git commit -m "Update test results"
-          git push
-          
+      - name: Run Parity
+        run: pnpm parity
+        env:
+          VITE_DATA_URL: ${{ vars.VITE_DATA_URL }}

@@ -74,7 +74,7 @@ export const applicationFilters: FilterSection = {
         type: "dynamic",
         value: "site_code",
         label: "site_name",
-        endpoint: "66d8a22692868e000864e898",
+        lookup: "sites",
       },
       component: "autocomplete",
       subLabel: "Annual Average Pounds of Chemical Applied",
@@ -125,7 +125,7 @@ export const pesticideInfoFilters: FilterSection = {
         type: "dynamic",
         value: "id",
         label: "label",
-        endpoint: `66e1e112c640880008ba68f2`,
+        lookup: "chemical_classes",
       },
       component:"autocomplete"
     },
@@ -136,7 +136,7 @@ export const pesticideInfoFilters: FilterSection = {
         type: "dynamic",
         value: "chem_code",
         label: "chem_name",
-        endpoint: `66d88452ae7ce10008a9473f`,
+        lookup: "chemicals",
       },
       component: "autocomplete-no-list",
       subLabel: "Annual Average Pounds of Chemical Applied",
@@ -157,23 +157,12 @@ export const pesticideInfoFilters: FilterSection = {
         value: "product_code",
         label: "product_name",
         // @ts-ignore
-        endpoint: `66d8a20a92868e000864e897`,
+        lookup: "products",
       },
       subLabel: "Annual Average Pounds of Chemical Applied",
       subcolumn: "yearly_average",
       component: "autocomplete-no-list",
     },
-    // {
-    //   queryParam: "ai_class",
-    //   label: "Chemical Class",
-    //   options: {
-    //     type: "dynamic",
-    //     value: "ai_class_ID",
-    //     label: "ai_class",
-    //     endpoint: `66d88473ae7ce10008a94740`,
-    //   },
-    //   component: "autocomplete",
-    // },
     {
       queryParam: "ai_type",
       label: "Use Type",
@@ -182,7 +171,7 @@ export const pesticideInfoFilters: FilterSection = {
         value: "ai_type_ID",
         label: "ai_type",
         // @ts-ignore
-        endpoint: `66d88483ae7ce10008a94741`,
+        lookup: "use_types",
       },
       component: "autocomplete",
     },
@@ -198,7 +187,7 @@ export const impactFilters: FilterSection = {
       label: "Health/Environmental Impact",
       options: {
         type: "dynamic",
-        endpoint: "66d8a25592868e000864e899",
+        lookup: "health",
         value: "id",
         label: "label",
       },
@@ -239,7 +228,7 @@ export const timeseriesViews = [
     label: "Chemical Class",
     mainFilterKey: "Chemical Class",
     filterKeys: [...timeseriesDefaultFilterKeys, "Chemical Class"],
-    endpoint: "6745e03480f7590008e360de",
+    series: "class",
     dataCol: ["lbs_chm_used"],
     keyCol: "ai_class",
     dateCol: "monthyear",
@@ -259,7 +248,7 @@ export const timeseriesViews = [
     label: "Use Type",
     mainFilterKey: "Use Type",
     filterKeys: [...timeseriesDefaultFilterKeys, "Use Type"],
-    endpoint: "6745e0fa80f7590008e360df",
+    series: "usetype",
     dataCol: ["lbs_chm_used"],
     keyCol: "ai_type",
     dateCol: "monthyear",
@@ -275,30 +264,11 @@ export const timeseriesViews = [
     // ],
   },
 
-  // {
-  //   label: "Chemical Class",
-  //   mainFilterKey: "Chemical Class",
-  //   filterKeys: [...timeseriesDefaultFilterKeys, "Chemical Class"],
-  //   endpoint: "66a3dcb42bbe320009739fb9",
-  //   dataCol: "lbs_chm_used",
-  //   keyCol: "ai_class",
-  //   dateCol: "monthyear",
-  //   sortKeys: ["monthyear","ai_class"],
-  //   labelMapping: "Chemical Class",
-  //   defaultFilterOptions: [
-  //     {
-  //       label: "Chemical Class",
-  //       queryParam: "ai_class",
-  //       value: [71, 53],
-  //       valueLabels: ["Microbial", "Inorganic"],
-  //     },
-  //   ],
-  // },
   {
     label: "Active Ingredient",
     mainFilterKey: "Active Ingredient (AI)",
     filterKeys: [...timeseriesDefaultFilterKeys, "Active Ingredient (AI)"],
-    endpoint: "6745e18280f7590008e360e0",
+    series: "ai",
     dataCol: ["lbs_chm_used"],
     keyCol: "chem_code",
     dateCol: "monthyear",
@@ -317,7 +287,7 @@ export const timeseriesViews = [
     label: "Product",
     mainFilterKey: "Product",
     filterKeys: [...timeseriesDefaultFilterKeys, "Product"],
-    endpoint: "6745e1d780f7590008e360e1",
+    series: "product",
     dataCol: ["lbs_prd_used"],
     keyCol: "prodno",
     dateCol: "monthyear",
@@ -332,16 +302,6 @@ export const timeseriesViews = [
     //   },
     // ],
   },
-  // TODO
-  // {
-  //   label: "Health Impact",
-  //   filterKeys: ["Date Range", "Agricultural Use", "Health/Environmental Impact"],
-  //   endpoint: "",
-  //   dataCol: "lbs_prd_used",
-  //   keyCol: "",
-  //   dateCol: "monthyear",
-  //   sortKeys: ["monthyear",""]
-  // },
 ] as const;
 
 export const excludeKeys = ["Date Range", "Agricultural Use", "County", "Crop or Site"];
@@ -373,46 +333,10 @@ export const geographyFilters: FilterSection = {
         value: "CountyCode",
         label: "Name",
         // @ts-ignore
-        endpoint: `66db44c7f96f070008c08e39`,
+        lookup: "counties",
       },
       component: "autocomplete",
     },
-  //   {
-  //     queryParam: "townshiprange",
-  //     label: "Township Range",
-  //     options: {
-  //       type: "dynamic",
-  //       value: "TownshipRange",
-  //       label: "TownshipRange",
-  //       // @ts-ignore
-  //       endpoint: `6569009ee5a32a0008930614`,
-  //     },
-  //     component: "autocomplete",
-  //   },
-  //   {
-  //     queryParam: "schooldistrict",
-  //     label: "School District",
-  //     options: {
-  //       type: "dynamic",
-  //       value: "FIPS",
-  //       label: "Area Name",
-  //       // @ts-ignore
-  //       endpoint: `656789dcb678c50008c54a00`,
-  //     },
-  //     component: "autocomplete",
-  //   },
-  //   {
-  //     queryParam: "tract",
-  //     label: "Census Tract",
-  //     options: {
-  //       type: "dynamic",
-  //       value: "FIPS",
-  //       label: "FIPS",
-  //       // @ts-ignore
-  //       endpoint: `656763f6aeb11300087fbd84`,
-  //     },
-  //     component: "autocomplete",
-  //   },
   ],
 };
 const demographyFilters: FilterSection = {

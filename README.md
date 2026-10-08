@@ -6,55 +6,15 @@
 4. run `docker-compose up dev` to develop
 5. run `docker-compose up build` to build (outputs to `dist` folder)
 
-## Latest Test Results
-The expected deviation from default data is shown as a percentage.
+## Data
+The explorer queries static parquet files in the browser with [DuckDB-WASM](https://duckdb.org/docs/api/wasm/overview); there is no query server. `VITE_DATA_URL` points at the files (Cloudflare R2), which `cli/build_r2.py` in the `cpr` repo builds. The host must allow CORS and range requests.
 
-<!-- LATEST TEST HERE -->
+- **Query parity:** `pnpm parity` runs every query in `scripts/fixtures.json` (snapshots of the old nectr API) through `src/utils/queries.ts` and compares the results. `VITE_DATA_URL` can also be a local path to a `data/r2` build. CI runs it on pull requests.
+- **Validation against CalPIP:** open the site with `?page=validation` (locally, http://localhost:5173/?page=validation). It runs the explorer's queries live against the current data and compares them with the CalPIP exports in `public/groundtruth/csv_records`.
 
-| Test Name | Deviation |
-|-----------|-----------|
-| 2022 County Totals :: SUM_LBS_CHEMICAL | 0.077% |
-| 2022 County Totals :: SUM_LBS_PRODUCT | -10.281% |
-| 2023 County Totals :: SUM_LBS_CHEMICAL | 0.089% |
-| 2023 County Totals :: SUM_LBS_PRODUCT | 0.516% |
-| 2022 County correlation :: SUM_LBS_CHEMICAL r-squared | 100.0 |
-| 2022 County correlation :: SUM_LBS_PRODUCT r-squared | 99.75 |
-| 2023 County correlation :: SUM_LBS_CHEMICAL r-squared | 100.0 |
-| 2023 County correlation :: SUM_LBS_PRODUCT r-squared | 99.974 |
-| 2020 County ag totals :: SUM_LBS_CHEMICAL | 0.06% |
-| 2020 County ag totals :: SUM_LBS_PRODUCT | 0.084% |
-| 2020 County ag correlation :: SUM_LBS_CHEMICAL r-squared | 100.0 |
-| 2020 County ag correlation :: SUM_LBS_PRODUCT r-squared | 100.0 |
-| 2022 County non-ag totals :: SUM_LBS_CHEMICAL | 0.109% |
-| 2022 County non-ag totals :: SUM_LBS_PRODUCT | -5.146% |
-| 2023 County non-ag totals :: SUM_LBS_CHEMICAL | 0.127% |
-| 2023 County non-ag totals :: SUM_LBS_PRODUCT | 0.672% |
-| 2022 County non-ag correlation :: SUM_LBS_CHEMICAL r-squared | 99.999 |
-| 2022 County non-ag correlation :: SUM_LBS_PRODUCT r-squared | 97.985 |
-| 2023 County non-ag correlation :: SUM_LBS_CHEMICAL r-squared | 99.999 |
-| 2023 County non-ag correlation :: SUM_LBS_PRODUCT r-squared | 98.95 |
-| Tract Sum Total SUM_LBS_CHEMICAL | 0.1% |
-| Tract Sum Total SUM_LBS_PRODUCT | 0.144% |
-| School Districts Sum Total SUM_LBS_CHEMICAL | 0.1% |
-| School Districts Sum Total SUM_LBS_PRODUCT | 0.144% |
-| ZCTA Sum Total SUM_LBS_CHEMICAL | -1.914% |
-| ZCTA Sum Total SUM_LBS_PRODUCT | -2.099% |
-| Townships Total SUM_LBS_CHEMICAL | 0.1% |
-| Townships Total SUM_LBS_PRODUCT | 0.144% |
-| Section Total SUM_LBS_CHEMICAL | 0.1% |
-| Section Total SUM_LBS_PRODUCT | 0.144% |
-| 2020 :: Sections Sacramento alfalfa total POUNDS_CHEMICAL_APPLIED | -0.0% |
-| 2020 :: Sections Sacramento alfalfa total POUNDS_PRODUCT_APPLIED | -0.027% |
-| 2023 :: Sections Sacramento alfalfa total POUNDS_CHEMICAL_APPLIED | 0.0% |
-| 2023 :: Sections Sacramento alfalfa total POUNDS_PRODUCT_APPLIED | -0.477% |
-| 2020 :: Sections Sacramento alfalfa correlation :: POUNDS_CHEMICAL_APPLIED r-squared | 100.0 |
-| 2020 :: Sections Sacramento alfalfa correlation :: POUNDS_PRODUCT_APPLIED r-squared | 100.0 |
-| 2023 :: Sections Sacramento alfalfa correlation :: POUNDS_CHEMICAL_APPLIED r-squared | 100.0 |
-| 2023 :: Sections Sacramento alfalfa correlation :: POUNDS_PRODUCT_APPLIED r-squared | 99.932 |
-<!-- END LATEST TEST -->
 ## env requirements
 ```
-VITE_DATA_ENDPOINT = ... // Open Spatial Lab NECTR endpoint
+VITE_DATA_URL = ... // base URL of the parquet data on R2, e.g. https://<r2-custom-domain>/v1
 VITE_MAPBOX_TOKEN = ... // mapbox API key
 
 ```

@@ -1,5 +1,6 @@
 import React from "react";
 import { FilterSpec, OptionLabel } from "../types/state";
+import { DATA_URL } from "../utils/queries";
 
 export const useOptions = (spec: FilterSpec) => {
   const [options, setOptions] = React.useState<OptionLabel[]>(
@@ -12,7 +13,7 @@ export const useOptions = (spec: FilterSpec) => {
       spec.options.value &&
       spec.options.label
     ) {
-      fetch(`${import.meta.env.VITE_DATA_ENDPOINT}${spec.options.endpoint}`)
+      fetch(`${DATA_URL}/lookup/${spec.options.lookup}.json`)
         .then((response) => response.json())
         .then((data) => {
           const options = data.map((item: any) => ({

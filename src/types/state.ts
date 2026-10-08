@@ -5,7 +5,8 @@ export type OptionLabel = {
 }
 
 export type DynamicOptionSpec = OptionLabel & {
-  endpoint: string;
+  // file name under ${VITE_DATA_URL}/lookup/
+  lookup: string;
 }
 
 export type OptionFilterSpec = {
@@ -65,8 +66,6 @@ export type State = {
   setFilterKeys: (keys: string[]) => void;
   setFilter: (filter: FilterState) => void;
   
-  queryEndpoint: string;
-  setQueryEndpoint: (endpoint: string) => void;
   executeQuery: () => void;
   timestamp: number;
 
