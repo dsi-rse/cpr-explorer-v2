@@ -100,6 +100,9 @@ export const MainMapView: React.FC<{
       setTooltip({
         x: info.x,
         y: info.y,
+        // flip toward the cursor past the midpoint so the tooltip stays inside the map
+        flipX: info.x > info.viewport?.width / 2,
+        flipY: info.y > info.viewport?.height / 2,
         data: {
           ...info.object.properties,
           ...data,
