@@ -10,6 +10,11 @@
 The explorer queries static parquet files in the browser with [DuckDB-WASM](https://duckdb.org/docs/api/wasm/overview); there is no query server. The files live on Cloudflare R2 at `https://pesticide.cdn.uchicago-dsi.org/v1` (set in `src/utils/queries.ts`; `VITE_DATA_URL` overrides it) and are built by `cli/build_r2.py` in the `cpr` repo. The host must allow CORS and range requests.
 
 - **Query parity:** `pnpm parity` runs every query in `scripts/fixtures.json` (snapshots of the old nectr API) through `src/utils/queries.ts` and compares the results. `VITE_DATA_URL` can also be a local path to a `data/r2` build. CI runs it on pull requests.
+- **DuckDB runtime:** the wasm, workers and parquet extension load from the same bucket (`duckdb-wasm/<package version>/`), not from jsDelivr or extensions.duckdb.org. After upgrading `@duckdb/duckdb-wasm`, upload the new runtime with an R2 API token that can write to the bucket (the same kind the `cpr` pipeline uses):
+  ```bash
+  R2_ACCOUNT_ID=… R2_BUCKET=… AWS_ACCESS_KEY_ID=… AWS_SECRET_ACCESS_KEY=… pnpm exec tsx scripts/duckdb-runtime.ts upload
+  ```
+  CI fails until the files for the pinned version are there.
 - **Validation against CalPIP:** open the site with `?page=validation` (locally, http://localhost:5173/?page=validation). It runs the explorer's queries live against the current data and compares them with the CalPIP exports in `public/groundtruth/csv_records`.
 
 ## env requirements
