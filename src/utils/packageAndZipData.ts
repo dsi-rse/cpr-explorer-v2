@@ -55,7 +55,7 @@ export const packageAndZipData = async (
   const dataOutput = {
     name: "data.csv",
     lastModified: new Date(),
-    input: unparse(data)
+    input: unparse(data, { columns: [...new Set(data.flatMap(Object.keys))] })
   }
   const licenseOutput = {
     name: "license.txt",
@@ -151,12 +151,14 @@ export const excelExportData = async (
   })
 
   // add the data to the second sheet
-  dataSheet.addRows([Object.keys(data[0] || {})])
+  // rows don't all share the same keys; use the union so values stay under their headers
+  const header = [...new Set(data.flatMap(Object.keys))]
+  dataSheet.addRows([header])
   dataSheet.columns.forEach(column => {
     column.width = 30
   })
   data.forEach(row => {
-    dataSheet.addRow(Object.values(row))
+    dataSheet.addRow(header.map(k => row[k] ?? null))
   })
   // download as xls
   const buffer = await workbook.xlsx.writeBuffer();
