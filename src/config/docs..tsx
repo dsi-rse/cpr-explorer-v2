@@ -24,7 +24,6 @@ export const errata = `
 Downloads prior to revision 12-2024 may contain the following errors:
 - Overestimate of pounds of product applied due to a data duplication error for pesticides with multiple active ingredients
 - Duplicate rows of the same ZIP codes and zip code data 
-- Not all areas (counties, tracts, etc.) were inlcuded in the download if no pesticide use was reported for given filters
 `
 export const dataSources = `
 Revision: ${revision}
@@ -41,8 +40,7 @@ Errata
 --
 Please note that data downloads prior to revision [11-2024-WORK-IN-PROGRESS] may contain overestimtions in the "lbs_prd_used" column.
 `
-export const dataDescription = {
-map: `
+const mapColumns = `
 Data columns
 --
 - GEOID: Geographic Identifier [Census tracts and ZIP codes (ZCTA) only]
@@ -53,7 +51,8 @@ Data columns
 - lbs_prd_used: Pounds of product used
 - ai_intensity: Pounds of active ingredient per square mile of total area (not just growing area)
 - prd_intensity: Pounds of product per square mile of total area (not just growing area)
-- Median HH Income: Median Household Income (2021 dollars)
+`
+const demographicColumns = `- Median HH Income: Median Household Income (2021 dollars)
 - Pop Total: Total Population
 - Pop NH Black: Total Black or African American Population (non hispanic)
 - Pct NH Black: Percent Black or African American
@@ -69,7 +68,11 @@ Data columns
 - Pct NH Pacific Islander: Percent Pacific Islander (non-Hispanic)
 - Pct No High School: Percent of people over 25 with Less Than High School degree as their highest level of education
 - Pct Agriculture: Percent of people working in Agriculture
-${dataSources}
+`
+export const dataDescription = {
+map: `${mapColumns}${dataSources}
+`,
+mapDualView: `${mapColumns}${demographicColumns}${dataSources}
 `,
 timeseries: `
 Data columns
