@@ -14,7 +14,7 @@ The explorer queries static parquet files in the browser with [DuckDB-WASM](http
 
 ## env requirements
 ```
-VITE_DATA_URL = ... // base URL of the parquet data on R2, e.g. https://<r2-custom-domain>/v1
+VITE_DATA_URL = https://pesticide.cdn.uchicago-dsi.org/v1 // parquet data on R2; a data refresh ships as /v2
 VITE_MAPBOX_TOKEN = ... // mapbox API key
 
 ```

@@ -24,4 +24,4 @@ jobs:
       - name: Run Parity
         run: pnpm parity
         env:
-          VITE_DATA_URL: ${{ vars.VITE_DATA_URL }}
+          VITE_DATA_URL: ${{ vars.VITE_DATA_URL || 'https://pesticide.cdn.uchicago-dsi.org/v1' }}
