@@ -73,6 +73,8 @@ export type State = {
   tooltip?: {
     x: number;
     y: number;
+    flipX?: boolean;
+    flipY?: boolean;
     data: Record<string, unknown>;
   },
   setTooltip: (tooltip: State['tooltip']) => void;

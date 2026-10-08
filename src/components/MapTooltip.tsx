@@ -31,7 +31,7 @@ export const MapTooltip: React.FC<{
         boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
         zIndex: 1000,
         fontSize: "0.75rem",
-        transform: "translate(0.5rem, 0.5rem)",
+        transform: `translate(${tooltip.flipX ? "calc(-100% - 0.5rem)" : "0.5rem"}, ${tooltip.flipY ? "calc(-100% - 0.5rem)" : "0.5rem"})`,
         pointerEvents: "none",
       }}
     >
