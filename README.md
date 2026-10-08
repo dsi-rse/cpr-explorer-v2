@@ -7,14 +7,14 @@
 5. run `docker-compose up build` to build (outputs to `dist` folder)
 
 ## Data
-The explorer queries static parquet files in the browser with [DuckDB-WASM](https://duckdb.org/docs/api/wasm/overview); there is no query server. `VITE_DATA_URL` points at the files (Cloudflare R2), which `cli/build_r2.py` in the `cpr` repo builds. The host must allow CORS and range requests.
+The explorer queries static parquet files in the browser with [DuckDB-WASM](https://duckdb.org/docs/api/wasm/overview); there is no query server. The files live on Cloudflare R2 at `https://pesticide.cdn.uchicago-dsi.org/v1` (set in `src/utils/queries.ts`; `VITE_DATA_URL` overrides it) and are built by `cli/build_r2.py` in the `cpr` repo. The host must allow CORS and range requests.
 
 - **Query parity:** `pnpm parity` runs every query in `scripts/fixtures.json` (snapshots of the old nectr API) through `src/utils/queries.ts` and compares the results. `VITE_DATA_URL` can also be a local path to a `data/r2` build. CI runs it on pull requests.
 - **Validation against CalPIP:** open the site with `?page=validation` (locally, http://localhost:5173/?page=validation). It runs the explorer's queries live against the current data and compares them with the CalPIP exports in `public/groundtruth/csv_records`.
 
 ## env requirements
 ```
-VITE_DATA_URL = https://pesticide.cdn.uchicago-dsi.org/v1 // parquet data on R2; a data refresh ships as /v2
+VITE_DATA_URL = ... // optional; defaults to https://pesticide.cdn.uchicago-dsi.org/v1 (src/utils/queries.ts)
 VITE_MAPBOX_TOKEN = ... // mapbox API key
 
 ```

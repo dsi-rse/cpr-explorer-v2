@@ -1,10 +1,10 @@
 // Runs every fixtures.json case (nectr API snapshots, 2026-10-08) through the query builders in src/utils/queries.ts.
 // Same comparison as cpr/fe-migration/reference_queries.py check().
-//   pnpm parity                                  # VITE_DATA_URL from the env or .env
+//   pnpm parity                                  # the R2 data, or VITE_DATA_URL from the env or .env
 //   VITE_DATA_URL=/path/to/cpr/data/r2 pnpm parity  # a local build works too
 import { readFileSync } from "node:fs";
 import { DuckDBInstance } from "@duckdb/node-api";
-import { DATA_ID, mapQuery, timeseriesQuery, type Geo, type Series } from "../src/utils/queries";
+import { DATA_ID, DATA_URL, mapQuery, timeseriesQuery, type Geo, type Series } from "../src/utils/queries";
 
 type Row = Record<string, number>; // keys are strings too, only compared via JSON.stringify
 type Case = {
@@ -18,8 +18,7 @@ type Case = {
   rows: Row[];
 };
 
-const base = (process.env.VITE_DATA_URL ?? "").replace(/\/$/, "");
-if (!base) throw new Error("set VITE_DATA_URL");
+const base = (process.env.VITE_DATA_URL || DATA_URL).replace(/\/$/, "");
 const SERIES_KEY: Record<Series, string> = { class: "ai_class", usetype: "ai_type", ai: "chem_code", product: "prodno" };
 const { cases }: { cases: Case[] } = JSON.parse(readFileSync(new URL("./fixtures.json", import.meta.url), "utf8"));
 

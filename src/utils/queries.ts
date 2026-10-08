@@ -6,8 +6,9 @@ export type Geo = "county" | "section" | "township" | "tract" | "school" | "zip"
 export type Series = "class" | "usetype" | "ai" | "product";
 export type Params = Record<string, string>;
 
-// optional chain: import.meta.env is undefined under tsx (scripts/parity.ts passes `base` itself)
-export const DATA_URL: string = (import.meta.env?.VITE_DATA_URL ?? "").replace(/\/$/, "");
+// R2 files are immutable; a data refresh ships as /v2. VITE_DATA_URL overrides it (pnpm parity also takes a local data/r2 path).
+// Optional chain: import.meta.env is undefined under tsx (scripts/parity.ts).
+export const DATA_URL: string = (import.meta.env?.VITE_DATA_URL || "https://pesticide.cdn.uchicago-dsi.org/v1").replace(/\/$/, "");
 
 // column name the map tiles join on, per geography
 export const DATA_ID: Record<Geo, string> = {
