@@ -11,7 +11,8 @@ const dollarFormatter = new Intl.NumberFormat('en-US', {
 export const cleanLabel = (value: any, label?:string): string => {
 
   if (label?.toLocaleLowerCase()?.includes("percent") && typeof value === 'number') {
-    return `${percentFormmater.format(value)}`;
+    // percent filters are stored 0-100
+    return `${percentFormmater.format(value / 100)}`;
   }
   if (label?.toLocaleLowerCase()?.includes("Income") && typeof value === 'number') {
     return `${dollarFormatter.format(value)}`;

@@ -13,6 +13,7 @@ const DataTable: React.FC<{onSelect?: (row: any) => void}> = ({
   onSelect
 }) => {
   const view = useStore((state) => state.view);
+  const queriedFilters = useStore((state) => state.queriedFilters);
 
   // id stays the staticData index so "download selected" maps back correctly
   const data = useMemo(() => {
@@ -23,9 +24,10 @@ const DataTable: React.FC<{onSelect?: (row: any) => void}> = ({
           id: i,
           ...d,
         };
-      })
+      }),
+      queriedFilters
     );
-  }, [view])
+  }, [view, queriedFilters])
 
   const columns = data.length ? Object.keys(data[0]).filter(f => f !== "id").map(f => ({
     field: f,
