@@ -23,19 +23,39 @@ export let staticData: any = [];
 const isDemographicColumn = (key: string) =>
   key === "Median HH Income" || /^(Pop|Pct) /.test(key);
 
+// demographic filter label -> the ACS columns it relates to
+const demographicColumnsByFilter: Record<string, string[]> = {
+  "Median Household Income": ["Median HH Income"],
+  "Percent Black or African American": ["Pop NH Black", "Pct NH Black"],
+  "Percent Hispanic or Latino": ["Pop Hispanic", "Pct Hispanic"],
+  "Percent Non-Hispanic White": ["Pop NH White", "Pct NH White"],
+  "Percent Asian": ["Pop NH Asian", "Pct NH Asian"],
+  "Percent Native American": ["Pop NH AIAN", "Pct NH AIAN"],
+  "Percent Native Hawaiian or Pacific Islander": ["Pop NH NHPI", "Pct NH NHPI"],
+};
+
 // rows as shown in the data table and downloads
 export const cleanRowsForView = (
   view: string,
-  rows: Record<string, unknown>[]
+  rows: Record<string, unknown>[],
+  filters: FilterState[] = []
 ) => {
   if (view !== "map" && view !== "mapDualView") return rows;
   // drop areas with no pesticide use for the current filters
   const used = rows.filter((row) => row.lbs_chm_used != null);
-  if (view === "mapDualView") return used;
-  // demographic columns only ship with the demographic view
+  // demographic columns only ship with the demographic view, and only for applied demographic filters
+  const keep = new Set(
+    view === "mapDualView"
+      ? filters
+          .filter((f) => f.value != null)
+          .flatMap((f) => demographicColumnsByFilter[f.label] || [])
+      : []
+  );
   return used.map((row) =>
     Object.fromEntries(
-      Object.entries(row).filter(([key]) => !isDemographicColumn(key))
+      Object.entries(row).filter(
+        ([key]) => !isDemographicColumn(key) || keep.has(key)
+      )
     )
   );
 };
@@ -81,7 +101,8 @@ export const useStore = create<State>(
 
       const outputData = cleanRowsForView(
         view,
-        indices ? indices.map((i) => staticData[i]) : staticData
+        indices ? indices.map((i) => staticData[i]) : staticData,
+        filters
       );
 
       const sortFn = !sortKeys

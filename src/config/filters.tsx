@@ -460,6 +460,7 @@ const demographyFilters: FilterSection = {
       queryParam: "income",
       label: "Median Household Income",
       subLabel: "(maximum median 2021 household income)",
+      format: "dollars",
       options: {
         type: "static",
         values: [
