@@ -151,7 +151,7 @@ export const excelExportData = async (
   })
 
   // add the data to the second sheet
-  dataSheet.addRows([Object.keys(data[0])])
+  dataSheet.addRows([Object.keys(data[0] || {})])
   dataSheet.columns.forEach(column => {
     column.width = 30
   })

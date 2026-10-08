@@ -19,6 +19,9 @@ import {
 } from "lz-string";
 
 export let staticData: any = [];
+// ACS columns joined onto every geography: Median HH Income, Pop *, Pct *
+const isDemographicColumn = (key: string) =>
+  key === "Median HH Income" || /^(Pop|Pct) /.test(key);
 const timeoutDuration = 500;
 let timeoutFn: any = null;
 
@@ -58,9 +61,24 @@ export const useStore = create<State>(
 
       const allFilters = [...filters, ...availableFiltersNotUsed];
 
-      const outputData = indices
+      let outputData = indices
         ? indices.map((i) => staticData[i])
         : staticData;
+
+      if (view === "map" || view === "mapDualView") {
+        // drop areas with no pesticide use for the current filters
+        outputData = outputData.filter(
+          (row: Record<string, unknown>) => row.lbs_chm_used != null
+        );
+      }
+      if (view === "map") {
+        // demographic columns only ship with the demographic view
+        outputData = outputData.map((row: Record<string, unknown>) =>
+          Object.fromEntries(
+            Object.entries(row).filter(([key]) => !isDemographicColumn(key))
+          )
+        );
+      }
 
       const sortFn = !sortKeys
         ? null
