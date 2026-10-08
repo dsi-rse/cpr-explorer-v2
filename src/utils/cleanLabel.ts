@@ -3,9 +3,10 @@ const percentFormmater = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 0
 })
 
-const dollarFormatter = new Intl.NumberFormat('en-US', {
+export const dollarFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
+  maximumFractionDigits: 0,
 })
 
 export const cleanLabel = (value: any, label?:string): string => {
@@ -14,7 +15,7 @@ export const cleanLabel = (value: any, label?:string): string => {
     // percent filters are stored 0-100
     return `${percentFormmater.format(value / 100)}`;
   }
-  if (label?.toLocaleLowerCase()?.includes("Income") && typeof value === 'number') {
+  if (label?.toLocaleLowerCase()?.includes("income") && typeof value === 'number') {
     return `${dollarFormatter.format(value)}`;
   }
   // replace _ with space

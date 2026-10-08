@@ -4,6 +4,7 @@ import Slider from "@mui/material/Slider";
 import { FilterSpec, FilterState } from "../types/state";
 import { Switch, Typography } from "@mui/material";
 import { wholePercentFormatter } from "./MapLegend";
+import { dollarFormatter } from "../utils/cleanLabel";
 
 function valuetext(value: number) {
   return `${value}`;
@@ -58,8 +59,11 @@ export const RangeSlider: React.FC<{
           <Slider
             getAriaLabel={() => spec.label}
             value={state?.value as number}
-            // TODO change this to part of spec
-            valueLabelFormat={(value) => wholePercentFormatter(+value/100)}
+            valueLabelFormat={(value) =>
+              spec.format === "dollars"
+                ? dollarFormatter.format(+value)
+                : wholePercentFormatter(+value / 100)
+            }
             // @ts-ignore
             color={active ? "primary" : "default"}
             min={min}
