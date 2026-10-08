@@ -107,18 +107,17 @@ export const mapQuery = (geo: Geo, p: Params, base = DATA_URL) => {
     where ${demog}`;
 };
 
-// statewide monthly series from the county tables; `county` filter narrows it
+// statewide monthly series from the county tables; `county` filter narrows it.
+// Ordered by month: infillTimeseries zero-fills gaps by walking rows in date order.
 export const timeseriesQuery = (series: Series, p: Params, base = DATA_URL) => {
   if (series === "product")
-    return `select monthyear, prodno, round(chm, 2) lbs_chm_used, round(prd, 2) lbs_prd_used from (${poundsBy("county", p, "monthyear, prodno", base)})`;
+    return `select monthyear, prodno, round(chm, 2) lbs_chm_used, round(prd, 2) lbs_prd_used from (${poundsBy("county", p, "monthyear, prodno", base)}) order by monthyear, prodno`;
   if (series === "ai")
-    return `select monthyear, chem_code, round(chm, 2) lbs_chm_used from (${poundsBy("county", p, "monthyear, chem_code", base)})`;
-  // class: a chemical in several selected classes counts toward each
-  const [group, name, keep] =
-    series === "usetype"
-      ? ["a.ai_type_ID", "ai_type", "true"]
-      : ["unnest(string_split(a.major_category, '|'))", "ai_class", `ai_class in (${lit(p.category ?? "")})`];
-  return `select monthyear, ${name}, round(sum(chm), 2) lbs_chm_used from (
-      select monthyear, ${group} ${name}, chm from (${poundsBy("county", p, "monthyear, chem_code", base)}) u join '${base}/lookup/chem_attrs.parquet' a using (chem_code)
-    ) where ${keep} group by all`;
+    return `select monthyear, chem_code, round(chm, 2) lbs_chm_used from (${poundsBy("county", p, "monthyear, chem_code", base)}) order by monthyear, chem_code`;
+  // class keys are a chemical's pipe-joined classes ('INO|FUM'), as nectr returned them: cleanMultiCategoryData
+  // splits them into the selected classes and their combinations, so a chemical in two selected classes is counted once
+  const [col, name] = series === "usetype" ? ["ai_type_ID", "ai_type"] : ["major_category", "ai_class"];
+  return `select monthyear, a.${col} ${name}, round(sum(chm), 2) lbs_chm_used
+    from (${poundsBy("county", p, "monthyear, chem_code", base)}) u join '${base}/lookup/chem_attrs.parquet' a using (chem_code)
+    group by all order by monthyear, ${name}`;
 };

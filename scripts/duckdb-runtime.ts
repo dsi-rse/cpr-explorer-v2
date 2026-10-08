@@ -46,11 +46,18 @@ const files = (["mvp", "eh"] as const).flatMap((b) => [
 ]);
 
 if (mode === "check") {
-  const origin = new URL(DATA_URL).origin;
-  const missing = [];
-  for (const f of files) if (!(await fetch(`${origin}/${f.key}`, { method: "HEAD" })).ok) missing.push(f.key);
-  if (missing.length) {
-    console.error(`missing on ${origin} (run scripts/duckdb-runtime.ts upload):\n  ${missing.join("\n  ")}`);
+  // the host the site is built against: VITE_DATA_URL (import.meta.env is undefined under tsx), else the default
+  const origin = new URL(process.env.VITE_DATA_URL || DATA_URL).origin;
+  const problems = [];
+  for (const f of files) {
+    const res = await fetch(`${origin}/${f.key}`, { method: "HEAD", headers: { Origin: "https://example.org" } });
+    // a wrong encoding or missing CORS header only shows up in the browser, so check those too
+    if (!res.ok) problems.push(`${f.key}: HTTP ${res.status}`);
+    else if (res.headers.get("content-encoding") !== "br") problems.push(`${f.key}: not served with Content-Encoding: br`);
+    else if (!res.headers.get("access-control-allow-origin")) problems.push(`${f.key}: no CORS header`);
+  }
+  if (problems.length) {
+    console.error(`${origin} (run scripts/duckdb-runtime.ts upload):\n  ${problems.join("\n  ")}`);
     process.exit(1);
   }
   console.log(`DuckDB-WASM ${duckdb.PACKAGE_VERSION} runtime is on ${origin}`);

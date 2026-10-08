@@ -156,7 +156,6 @@ export const pesticideInfoFilters: FilterSection = {
         type: "dynamic",
         value: "product_code",
         label: "product_name",
-        // @ts-ignore
         lookup: "products",
       },
       subLabel: "Annual Average Pounds of Chemical Applied",
@@ -170,7 +169,6 @@ export const pesticideInfoFilters: FilterSection = {
         type: "dynamic",
         value: "ai_type_ID",
         label: "ai_type",
-        // @ts-ignore
         lookup: "use_types",
       },
       component: "autocomplete",
@@ -332,7 +330,6 @@ export const geographyFilters: FilterSection = {
         type: "dynamic",
         value: "CountyCode",
         label: "Name",
-        // @ts-ignore
         lookup: "counties",
       },
       component: "autocomplete",

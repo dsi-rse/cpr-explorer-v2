@@ -15,6 +15,7 @@ The explorer queries static parquet files in the browser with [DuckDB-WASM](http
   R2_ACCOUNT_ID=… R2_BUCKET=… AWS_ACCESS_KEY_ID=… AWS_SECRET_ACCESS_KEY=… pnpm exec tsx scripts/duckdb-runtime.ts upload
   ```
   CI fails until the files for the pinned version are there.
+- **Year range:** `src/dates.ts` sets the years the UI offers. Update it by hand when a data refresh adds a year, until the explorer reads the pipeline's `manifest.json`.
 - **Validation against CalPIP:** open the site with `?page=validation` (locally, http://localhost:5173/?page=validation). It runs the explorer's queries live against the current data and compares them with the CalPIP exports in `public/groundtruth/csv_records`.
 
 ## env requirements

@@ -9,6 +9,7 @@ on:
 jobs:
   parity:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout Code
@@ -20,7 +21,8 @@ jobs:
           node-version: '22'
 
       - name: Install Dependencies
-        run: npm install -g pnpm && pnpm install --frozen-lockfile
+        # pinned: pnpm 9 (Workers Builds), 10 and 11 all install this repo, but treat build scripts differently
+        run: npm install -g pnpm@10 && pnpm install --frozen-lockfile
 
       - name: Check DuckDB runtime on R2
         run: pnpm exec tsx scripts/duckdb-runtime.ts check

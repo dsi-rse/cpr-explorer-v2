@@ -304,7 +304,8 @@ export const useStore = create<State>(
                 params
               )
         );
-        if (queryId !== latestQuery) return;
+        // superseded by a newer query, or the filters/layer changed while this one ran (the UI shows "apply changes")
+        if (queryId !== latestQuery || get().loadingState !== "loading") return;
         if (view === "timeseries") {
           const dateRange = uiFilters.find(
             (filter) => filter.label === "Date Range"
@@ -325,7 +326,7 @@ export const useStore = create<State>(
           timestamp,
         });
       } catch (e) {
-        if (queryId !== latestQuery) return;
+        if (queryId !== latestQuery || get().loadingState !== "loading") return;
         console.error(e);
         set({ loadingState: "error", timestamp });
       }

@@ -18,16 +18,35 @@ export const getDb = () =>
     const workerUrl = URL.createObjectURL(
       new Blob([`importScripts("${bundle.mainWorker}");`], { type: "text/javascript" })
     );
-    const instance = new duckdb.AsyncDuckDB(new duckdb.VoidLogger(), new Worker(workerUrl));
-    await instance.instantiate(bundle.mainModule, bundle.pthreadWorker);
-    // without this, duckdb-wasm downloads each parquet file whole instead of the row groups a query needs
-    await instance.open({ filesystem: { forceFullHTTPReads: false } });
-    URL.revokeObjectURL(workerUrl);
-    const conn = await instance.connect();
-    await conn.query(`set custom_extension_repository = '${runtime}/extensions'`);
-    // fetch the parquet extension now, during idle-time init, instead of on the first query
-    await conn.query("load parquet");
-    await conn.close();
+    const worker = new Worker(workerUrl);
+    const instance = new duckdb.AsyncDuckDB(new duckdb.VoidLogger(), worker);
+    // duckdb-wasm drops, rather than rejects, its pending calls when the worker fails: a missing worker script fires
+    // "error", a missing .wasm just hangs. Fail on either, so queries land in the error state and the next one retries.
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const failed = new Promise<never>((_, reject) => {
+      worker.addEventListener("error", (e) => reject(new Error(`DuckDB worker failed to load: ${e.message}`)), { once: true });
+      // ~6 MB to download: 60 s leaves room for slow connections
+      timer = setTimeout(() => reject(new Error("DuckDB didn't start within 60 s")), 60_000);
+    });
+    const start = async () => {
+      await instance.instantiate(bundle.mainModule, bundle.pthreadWorker);
+      // without this, duckdb-wasm downloads each parquet file whole instead of the row groups a query needs
+      await instance.open({ filesystem: { forceFullHTTPReads: false } });
+      const conn = await instance.connect();
+      await conn.query(`set custom_extension_repository = '${runtime}/extensions'`);
+      // fetch the parquet extension now, during idle-time init, instead of on the first query
+      await conn.query("load parquet");
+      await conn.close();
+    };
+    try {
+      await Promise.race([start(), failed]);
+    } catch (e) {
+      worker.terminate();
+      throw e;
+    } finally {
+      clearTimeout(timer);
+      URL.revokeObjectURL(workerUrl);
+    }
     return instance;
   })().catch((e) => {
     db = undefined; // let the next query retry
