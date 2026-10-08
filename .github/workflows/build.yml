@@ -19,7 +19,7 @@ jobs:
           node-version: '18'
 
       - name: Install pnpm
-        run: npm install -g pnpm
+        run: npm install -g pnpm@10
 
       # Install dependencies
       - name: Install Dependencies
@@ -29,7 +29,7 @@ jobs:
       - name: Run Build
         run: pnpm build
         env:
-          VITE_DATA_ENDPOINT: ${{ secrets.VITE_DATA_ENDPOINT }}
+          VITE_DATA_URL: ${{ vars.VITE_DATA_URL }}
           VITE_MAPBOX_TOKEN: ${{ secrets.VITE_MAPBOX_TOKEN }}
 
       # Save build artifacts (optional)

@@ -6,12 +6,12 @@ import {
   timeseriesViews,
 } from "../config/filters";
 import { getMapConfig } from "../config/map";
-import { unpack } from "msgpackr/unpack";
 import { exportData } from "../utils/packageAndZipData";
 import { infillTimeseries } from "../utils/timeseries";
 import { wrapper } from "../utils/stateUtils";
 import { findExistingFilter } from "../utils/findExistingFilter";
-import { constructQuery } from "../utils/constructQuery";
+import { buildParams, mapQuery, timeseriesQuery } from "../utils/queries";
+import { query } from "../utils/db";
 import { deepCloneRecords } from "../utils/deepCloneRecords";
 import {
   compressToEncodedURIComponent,
@@ -61,13 +61,14 @@ export const cleanRowsForView = (
 };
 const timeoutDuration = 500;
 let timeoutFn: any = null;
+// bumped per query, so a slower superseded query can't overwrite newer staticData
+let latestQuery = 0;
 
 const defaultMapConfig = getMapConfig("map");
 
 const defaultViewConfig = {
   view: "map",
   config: {
-    endpoint: defaultMapConfig[0].endpoint,
     filterKeys: defaultMapConfig[0].filterKeys
   } as any
 };
@@ -135,7 +136,6 @@ export const useStore = create<State>(
     },
     loadingState: "unloaded" as State["loadingState"],
     geography: defaultMapConfig[0].layer!,
-    queryEndpoint: defaultViewConfig.config.endpoint,
     mapLayer: "pesticide-use",
     view: defaultViewConfig.view,
     setView: (view: string) => {
@@ -184,15 +184,10 @@ export const useStore = create<State>(
       }
 
       const timeseriesType = timeseriesConfig?.label || get()?.timeseriesType;
-      const queryEndpoint =
-        timeseriesConfig.endpoint ||
-        mapViewConfig.endpoint ||
-        get().queryEndpoint;
 
       set({
         view,
         loadingState,
-        queryEndpoint,
         geography,
         uiFilters,
         // @ts-ignore
@@ -223,7 +218,6 @@ export const useStore = create<State>(
         set({
           timeseriesType: type,
           filterKeys,
-          queryEndpoint: timeseriesConfig?.endpoint || "",
           uiFilters: [
             ...previousFilters,
             //  ...defaultFilter
@@ -270,18 +264,19 @@ export const useStore = create<State>(
           };
         }
       }),
-    setQueryEndpoint: (endpoint) => set({ queryEndpoint: endpoint }),
     setLoadingState: (loadingState) => set({ loadingState }),
     executeQuery: async () => {
+      const { uiFilters, filterKeys, timeseriesType, view, geography } = get();
+      const isMap = view.toLowerCase().includes("map");
+      if (!isMap && view !== "timeseries") return;
+      const queryId = ++latestQuery;
       set({ loadingState: "loading" });
-      const queryEndpoint = get().queryEndpoint;
-      const { uiFilters, filterKeys, timeseriesType, view } = get();
+      const timeseriesConfig = timeseriesViews.find(
+        (view) => view.label === timeseriesType
+      );
       // if is timeseries and filters that are not date ragen is empty or greater than 10
       // error
       if (view === "timeseries") {
-        const timeseriesConfig = timeseriesViews.find(
-          (view) => view.label === timeseriesType
-        );
         if (!timeseriesConfig) return;
         const filterState = uiFilters.find(
           (filter) => filter.label === timeseriesConfig.mainFilterKey
@@ -306,21 +301,12 @@ export const useStore = create<State>(
           return;
         }
       }
-      const url = constructQuery(
-        `${import.meta.env.VITE_DATA_ENDPOINT}${queryEndpoint}`,
-        uiFilters,
-        filterKeys
-      );
 
       const timestamp = performance.now();
       const agFilter =
         uiFilters.find((f) => f.queryParam === "usetype")?.value !== "AG";
 
-      if (
-        get().view.toLowerCase().includes("map") &&
-        get().geography !== "Counties" &&
-        agFilter
-      ) {
+      if (isMap && geography !== "Counties" && agFilter) {
         set({
           loadingState: "ag-on-not-counties",
           queriedFilters: deepCloneRecords(uiFilters),
@@ -329,48 +315,40 @@ export const useStore = create<State>(
         return;
       }
 
-      const response = await fetch(url);
-      if (response.ok) {
-        const buffer = await response.arrayBuffer();
-        staticData = unpack(buffer as Buffer);
-        if (get().view === "timeseries") {
-          if (!staticData.length){
-            const retryResponse = await fetch(url.replace("format=msgpack", "format=json"));
-            if (retryResponse.ok) {
-              const retryData = await retryResponse.json();
-              staticData = retryData;
-            }
-          }
-          const config = timeseriesViews.find(
-            (view) => view.label === get().timeseriesType
-          );
-          const filters = get().uiFilters;
-          const dateRange = filters.find(
+      try {
+        const params = buildParams(uiFilters, filterKeys);
+        let data = await query(
+          view === "timeseries"
+            ? timeseriesQuery(timeseriesConfig!.series, params)
+            : mapQuery(
+                getMapConfig(view).find((c) => c.layer === geography)!.geo,
+                params
+              )
+        );
+        // superseded by a newer query, or the filters/layer changed while this one ran (the UI shows "apply changes")
+        if (queryId !== latestQuery || get().loadingState !== "loading") return;
+        if (view === "timeseries") {
+          const dateRange = uiFilters.find(
             (filter) => filter.label === "Date Range"
           );
-          staticData = infillTimeseries(
-            staticData,
-            config,
+          data = infillTimeseries(
+            data,
+            timeseriesConfig,
             dateRange?.value as string[],
-            filters
+            uiFilters
           );
         }
+        staticData = data;
         // @ts-ignore
         window.staticData = staticData;
-        if (staticData.length === 0) {
-          set({
-            loadingState: "no-data",
-            queriedFilters: deepCloneRecords(uiFilters),
-            timestamp,
-          });
-        } else {
-          set({
-            loadingState: "loaded",
-            queriedFilters: deepCloneRecords(uiFilters),
-            timestamp,
-          });
-        }
-      } else {
+        set({
+          loadingState: staticData.length === 0 ? "no-data" : "loaded",
+          queriedFilters: deepCloneRecords(uiFilters),
+          timestamp,
+        });
+      } catch (e) {
+        if (queryId !== latestQuery || get().loadingState !== "loading") return;
+        console.error(e);
         set({ loadingState: "error", timestamp });
       }
     },
@@ -382,7 +360,6 @@ export const useStore = create<State>(
       if (geoData) {
         set({
           geography,
-          queryEndpoint: geoData.endpoint,
           loadingState: "settings-changed",
           filterKeys: geoData.filterKeys || [],
         });
@@ -482,7 +459,6 @@ export const useStore = create<State>(
               ...args,
               // @ts-ignore
               filterKeys: timeseriesType.filterKeys || [],
-              queryEndpoint: timeseriesType.endpoint,
             };
           }
           break;
@@ -495,7 +471,6 @@ export const useStore = create<State>(
           if (geoData) {
             args = {
               ...args,
-              queryEndpoint: geoData.endpoint,
               filterKeys: geoData.filterKeys || [],
             };
             break;

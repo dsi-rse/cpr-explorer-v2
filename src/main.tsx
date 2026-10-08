@@ -4,6 +4,9 @@ import App from "./App.tsx";
 import createTheme from "@mui/material/styles/createTheme";
 import ThemeProvider from "@mui/material/styles/ThemeProvider";
 import "./index.css";
+import { getDb } from "./utils/db";
+import { page } from "./utils/queryParams";
+import { Validation } from "./components/Validation";
 
 export const theme = createTheme({
   // primary accent color rgb((96, 158, 66)
@@ -65,10 +68,13 @@ export const theme = createTheme({
   },
 });
 
+// fetch the DuckDB wasm while the page settles, so the first query doesn't wait for it
+(window.requestIdleCallback ?? setTimeout)(() => getDb().catch(() => {}));
+
 ReactDOM.createRoot(document.getElementById("explorer-app-root")!).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
-      <App />
+      {page === "validation" ? <Validation /> : <App />}
     </ThemeProvider>
   </React.StrictMode>
 );

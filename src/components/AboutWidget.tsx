@@ -283,6 +283,8 @@ export const AboutWidget = () => {
           </a>
           . Data on adjuvant use is not made publicly available. The California
           PUR data are updated in this tool within six months of release by DPR.
+          The <a href="?page=validation">data validation page</a> compares this
+          tool's totals with CalPIP query exports, live.
           <br />
           <br />
           This interactive data tool enables users to filter or summarize
