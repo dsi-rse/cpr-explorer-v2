@@ -14,7 +14,7 @@ import { useStore } from "../state/store";
 import { styled, useMediaQuery } from "@mui/system";
 import { useMobileFiltersState } from "./FilterControls";
 import { TabButton } from "./TabButton";
-import { END_YEAR, START_YEAR } from "../dates";
+import { END_YEAR, START_YEAR } from "../manifest";
 
 interface JoyrideState {
   run: boolean;
@@ -115,8 +115,8 @@ const getStepLogic: (
       if (!yearIs2021) {
         const newFilter = {
           ...(dateRange as FilterState),
-          value: [`${END_YEAR-1}}-01`, `${END_YEAR}-12`],
-          valueLabels: [`${END_YEAR-1}}-01`, `${END_YEAR}-02`],
+          value: [`${END_YEAR-1}-01`, `${END_YEAR}-12`],
+          valueLabels: [`${END_YEAR-1}-01`, `${END_YEAR}-02`],
         };
         sub();
         state.setFilter(newFilter);

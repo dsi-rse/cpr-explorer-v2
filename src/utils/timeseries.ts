@@ -70,6 +70,9 @@ export const infillTimeseries = (
       const n = labelList.value.length;
       for (let r = 2; r <= n; r++) {
         for (let indices of combinations(n, r)) {
+          // order by id to match the relevantKeys.sort() keys in cleanMultiCategoryData
+          // @ts-ignore
+          indices.sort((a, b) => (String(labelList.value[a]) < String(labelList.value[b]) ? -1 : 1));
           // @ts-ignore 9/27 no time available for correct typing
           const keys = indices.map((i) =>
             // @ts-ignore

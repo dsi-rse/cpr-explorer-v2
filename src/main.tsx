@@ -1,9 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
 import createTheme from "@mui/material/styles/createTheme";
 import ThemeProvider from "@mui/material/styles/ThemeProvider";
+import Alert from "@mui/material/Alert";
 import "./index.css";
+import { getDb } from "./utils/db";
+import { page } from "./utils/queryParams";
+import { END_YEAR, PREVIEW, START_YEAR, VERSION, loadManifest } from "./manifest";
 
 export const theme = createTheme({
   // primary accent color rgb((96, 158, 66)
@@ -65,10 +68,37 @@ export const theme = createTheme({
   },
 });
 
-ReactDOM.createRoot(document.getElementById("explorer-app-root")!).render(
-  <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <App />
-    </ThemeProvider>
-  </React.StrictMode>
-);
+// fetch the DuckDB wasm while the page settles, so the first query doesn't wait for it
+(window.requestIdleCallback ?? setTimeout)(() => getDb().catch(() => {}));
+
+const root = ReactDOM.createRoot(document.getElementById("explorer-app-root")!);
+const render = (node: React.ReactNode) =>
+  root.render(
+    <React.StrictMode>
+      <ThemeProvider theme={theme}>{node}</ThemeProvider>
+    </React.StrictMode>
+  );
+
+loadManifest()
+  // import the page after the manifest: the config modules read the years when they're first evaluated
+  .then(() => (page === "validation" ? import("./components/Validation").then((m) => m.Validation) : import("./App").then((m) => m.default)))
+  .then((Page) =>
+    render(
+      <>
+        {PREVIEW && (
+          <Alert severity="info" sx={{ position: "fixed", bottom: 8, left: 8, zIndex: 2000 }}>
+            Previewing data version {VERSION} (years {START_YEAR}–{END_YEAR})
+          </Alert>
+        )}
+        <Page />
+      </>
+    )
+  )
+  .catch((e) => {
+    console.error(e);
+    render(
+      <Alert variant="outlined" severity="error" sx={{ m: 2 }}>
+        Error loading data
+      </Alert>
+    );
+  });

@@ -8,7 +8,7 @@ import TimeseriesChart from "./TimeseriesChart";
 import { LoadingStateShade } from "./LoadingShade";
 import { FilterListBox } from "./FilterListBox";
 import { isDisplay } from "../utils/queryParams";
-import { END_YEAR } from "../dates";
+import { END_YEAR } from "../manifest";
 
 export const TimeseriesWidget = () => {
   // const executeQuery = useStore((state) => state.executeQuery);

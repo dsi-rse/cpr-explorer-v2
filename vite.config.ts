@@ -19,11 +19,6 @@ export default defineConfig({
     //   filename: "analyze.html", // will be saved in project's root
     // })
   ],
-  define: {
-    "procces.env": {
-      VITE_DATA_ENDOINT: "",
-    },
-  },
   optimizeDeps: {
     include: ["@emotion/react", "@emotion/styled", "@mui/material/Tooltip"],
   },
