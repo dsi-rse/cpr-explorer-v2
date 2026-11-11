@@ -1,6 +1,6 @@
 import React from "react";
 import { FilterSpec, OptionLabel } from "../types/state";
-import { DATA_URL } from "../utils/queries";
+import { DATA_URL } from "../manifest";
 
 export const useOptions = (spec: FilterSpec) => {
   const [options, setOptions] = React.useState<OptionLabel[]>(

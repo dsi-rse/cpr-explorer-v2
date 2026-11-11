@@ -14,7 +14,7 @@ import { useStore } from "../state/store";
 import { styled, useMediaQuery } from "@mui/system";
 import { useMobileFiltersState } from "./FilterControls";
 import { TabButton } from "./TabButton";
-import { END_YEAR, START_YEAR } from "../dates";
+import { END_YEAR, START_YEAR } from "../manifest";
 
 interface JoyrideState {
   run: boolean;

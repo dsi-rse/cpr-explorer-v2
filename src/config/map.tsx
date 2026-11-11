@@ -7,7 +7,7 @@ import {
   pesticideInfoFilters,
 } from "./filters";
 import * as d3 from "d3";
-import { END_YEAR, START_YEAR } from "../dates";
+import { END_YEAR, START_YEAR } from "../manifest";
 import type { Geo } from "../utils/queries";
 
 const demographicFilterKeys = [

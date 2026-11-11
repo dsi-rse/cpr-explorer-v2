@@ -4,7 +4,7 @@ import React from "react";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
-import { END_YEAR } from "../dates";
+import { END_YEAR } from "../manifest";
 
 const InlineCode = styled("code")({
   backgroundColor: "#f4f4f4",

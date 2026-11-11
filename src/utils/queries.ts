@@ -1,14 +1,10 @@
-// Every FE data query, as DuckDB SQL over the static parquet files on R2 (VITE_DATA_URL).
+// Every FE data query, as DuckDB SQL over the static parquet files of one data build (`base`, e.g. DATA_URL in src/manifest.ts).
 // Ported unchanged in logic from cpr/fe-migration/reference_queries.py; `pnpm parity` checks it against nectr snapshots.
 import type { FilterState } from "../types/state";
 
 export type Geo = "county" | "section" | "township" | "tract" | "school" | "zip";
 export type Series = "class" | "usetype" | "ai" | "product";
 export type Params = Record<string, string>;
-
-// R2 files are immutable; a data refresh ships as /v2. VITE_DATA_URL overrides it (pnpm parity also takes a local data/r2 path).
-// Optional chain: import.meta.env is undefined under tsx (scripts/parity.ts).
-export const DATA_URL: string = (import.meta.env?.VITE_DATA_URL || "https://pesticide.cdn.uchicago-dsi.org/v1").replace(/\/$/, "");
 
 // column name the map tiles join on, per geography
 export const DATA_ID: Record<Geo, string> = {
@@ -93,7 +89,7 @@ const poundsBy = (geo: Geo, p: Params, keys: string, base: string) =>
     : `select ${keys}, sum(chm) chm, sum(prd) prd from '${base}/summary/${geo}.parquet' where ${where(p, base)} group by all`;
 
 // one row per geography (left join: geographies without use get null lbs), same columns as the old API
-export const mapQuery = (geo: Geo, p: Params, base = DATA_URL) => {
+export const mapQuery = (geo: Geo, p: Params, base: string) => {
   const demog =
     Object.entries(DEMOG)
       .filter(([k]) => k in p)
@@ -109,7 +105,7 @@ export const mapQuery = (geo: Geo, p: Params, base = DATA_URL) => {
 
 // statewide monthly series from the county tables; `county` filter narrows it.
 // Ordered by month: infillTimeseries zero-fills gaps by walking rows in date order.
-export const timeseriesQuery = (series: Series, p: Params, base = DATA_URL) => {
+export const timeseriesQuery = (series: Series, p: Params, base: string) => {
   if (series === "product")
     return `select monthyear, prodno, round(chm, 2) lbs_chm_used, round(prd, 2) lbs_prd_used from (${poundsBy("county", p, "monthyear, prodno", base)}) order by monthyear, prodno`;
   if (series === "ai")

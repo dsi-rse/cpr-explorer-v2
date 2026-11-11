@@ -1,5 +1,5 @@
 import type { AsyncDuckDB } from "@duckdb/duckdb-wasm";
-import { DATA_URL } from "./queries";
+import { DATA_HOST } from "../manifest";
 
 let db: Promise<AsyncDuckDB> | undefined;
 
@@ -9,7 +9,7 @@ let db: Promise<AsyncDuckDB> | undefined;
 export const getDb = () =>
   (db ??= (async () => {
     const duckdb = await import("@duckdb/duckdb-wasm");
-    const runtime = `${new URL(DATA_URL).origin}/duckdb-wasm/${duckdb.PACKAGE_VERSION}`;
+    const runtime = `${DATA_HOST}/duckdb-wasm/${duckdb.PACKAGE_VERSION}`;
     const bundle = await duckdb.selectBundle({
       mvp: { mainModule: `${runtime}/duckdb-mvp.wasm`, mainWorker: `${runtime}/duckdb-browser-mvp.worker.js` },
       eh: { mainModule: `${runtime}/duckdb-eh.wasm`, mainWorker: `${runtime}/duckdb-browser-eh.worker.js` },

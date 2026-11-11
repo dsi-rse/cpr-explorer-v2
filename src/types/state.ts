@@ -5,7 +5,7 @@ export type OptionLabel = {
 }
 
 export type DynamicOptionSpec = OptionLabel & {
-  // file name under ${VITE_DATA_URL}/lookup/
+  // file name under ${DATA_URL}/lookup/
   lookup: string;
 }
 

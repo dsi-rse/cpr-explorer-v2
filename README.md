@@ -7,20 +7,20 @@
 5. run `docker-compose up build` to build (outputs to `dist` folder)
 
 ## Data
-The explorer queries static parquet files in the browser with [DuckDB-WASM](https://duckdb.org/docs/api/wasm/overview); there is no query server. The files live on Cloudflare R2 at `https://pesticide.cdn.uchicago-dsi.org/v1` (set in `src/utils/queries.ts`; `VITE_DATA_URL` overrides it) and are built by `cli/build_r2.py` in the `cpr` repo. The host must allow CORS and range requests.
+The explorer queries static parquet files in the browser with [DuckDB-WASM](https://duckdb.org/docs/api/wasm/overview); there is no query server. The files live on Cloudflare R2 under `https://pesticide.cdn.uchicago-dsi.org` (set in `src/manifest.ts`; `VITE_DATA_URL` overrides it) and are built by the `cpr` repo's pipeline. The host must allow CORS and range requests.
 
-- **Query parity:** `pnpm parity` runs every query in `scripts/fixtures.json` (snapshots of the old nectr API) through `src/utils/queries.ts` and compares the results. `VITE_DATA_URL` can also be a local path to a `data/r2` build. CI runs it on pull requests.
+- **Data versions:** each build is an immutable `v<date>-<time>/` folder. On load the site reads `manifest.json`, which says which version is live and its year range, and queries that folder. The `cpr` repo's Build data workflow points `preview.json` at each new build, and Publish data points `manifest.json` at it, so data updates need no deploy here. Add `?preview` to the URL to see the build in `preview.json`, with a banner naming it. The site shows an error, rather than guessing, if the manifest's `format` isn't 1.
+- **Query parity:** `pnpm parity` runs every query in `scripts/fixtures.json` (snapshots of the old nectr API) through `src/utils/queries.ts` and compares the results. It reads `v1`, which matches those snapshots, whatever the manifest says; `pnpm parity /path/to/cpr/data/r2` checks a local build instead. CI runs it on pull requests.
 - **DuckDB runtime:** the wasm, workers and parquet extension load from the same bucket (`duckdb-wasm/<package version>/`), not from jsDelivr or extensions.duckdb.org. After upgrading `@duckdb/duckdb-wasm`, upload the new runtime with an R2 API token that can write to the bucket (the same kind the `cpr` pipeline uses):
   ```bash
   R2_ACCOUNT_ID=… R2_BUCKET=… AWS_ACCESS_KEY_ID=… AWS_SECRET_ACCESS_KEY=… pnpm exec tsx scripts/duckdb-runtime.ts upload
   ```
   CI fails until the files for the pinned version are there.
-- **Year range:** `src/dates.ts` sets the years the UI offers. Update it by hand when a data refresh adds a year, until the explorer reads the pipeline's `manifest.json`.
-- **Validation against CalPIP:** open the site with `?page=validation` (locally, http://localhost:5173/?page=validation). It runs the explorer's queries live against the current data and compares them with the CalPIP exports in `public/groundtruth/csv_records`.
+- **Validation against CalPIP:** open the site with `?page=validation` (locally, http://localhost:5173/?page=validation). It runs the explorer's queries live against the current data (or the preview build, with `&preview`) and compares them with the CalPIP exports in `public/groundtruth/csv_records`.
 
 ## env requirements
 ```
-VITE_DATA_URL = ... // optional; defaults to https://pesticide.cdn.uchicago-dsi.org/v1 (src/utils/queries.ts)
+VITE_DATA_URL = ... // optional bucket root; defaults to https://pesticide.cdn.uchicago-dsi.org (src/manifest.ts)
 VITE_MAPBOX_TOKEN = ... // mapbox API key
 
 ```

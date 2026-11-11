@@ -1,11 +1,13 @@
 // Runs every fixtures.json case (nectr API snapshots, 2026-10-08) through the query builders in src/utils/queries.ts.
 // Same comparison as cpr/fe-migration/reference_queries.py check(), plus row order, duplicate keys and column names.
-//   pnpm parity                                  # the R2 data, or VITE_DATA_URL from the env or .env
-//   VITE_DATA_URL=/path/to/cpr/data/r2 pnpm parity  # a local build works too
+// Pinned to v1, not the manifest's version: the fixtures are old-API snapshots and v1 was built from the same data.
+//   pnpm parity                          # <bucket>/v1: the R2 bucket, or VITE_DATA_URL from the env or .env
+//   pnpm parity /path/to/cpr/data/r2     # a local build
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { DuckDBInstance } from "@duckdb/node-api";
-import { DATA_ID, DATA_URL, buildParams, mapQuery, timeseriesQuery, type Geo, type Series } from "../src/utils/queries";
+import { DATA_HOST } from "../src/manifest";
+import { DATA_ID, buildParams, mapQuery, timeseriesQuery, type Geo, type Series } from "../src/utils/queries";
 
 type Row = Record<string, number>; // keys are strings too, only compared via JSON.stringify
 type Case = {
@@ -19,7 +21,7 @@ type Case = {
   rows: Row[];
 };
 
-const base = (process.env.VITE_DATA_URL || DATA_URL).replace(/\/$/, "");
+const base = process.argv[2] ?? `${(process.env.VITE_DATA_URL || DATA_HOST).replace(/\/$/, "")}/v1`;
 const SERIES_KEY: Record<Series, string> = { class: "ai_class", usetype: "ai_type", ai: "chem_code", product: "prodno" };
 const fx: { cases: Case[]; sample_api_rows: Record<Geo, Row> } = JSON.parse(
   readFileSync(new URL("./fixtures.json", import.meta.url), "utf8")

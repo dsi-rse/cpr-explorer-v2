@@ -10,7 +10,7 @@ import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { brotliCompressSync } from "node:zlib";
-import { DATA_URL } from "../src/utils/queries";
+import { DATA_HOST } from "../src/manifest";
 
 const [mode, stageDir] = process.argv.slice(2);
 if (mode === "upload" && !(process.env.R2_ACCOUNT_ID && process.env.R2_BUCKET))
@@ -46,8 +46,8 @@ const files = (["mvp", "eh"] as const).flatMap((b) => [
 ]);
 
 if (mode === "check") {
-  // the host the site is built against: VITE_DATA_URL (import.meta.env is undefined under tsx), else the default
-  const origin = new URL(process.env.VITE_DATA_URL || DATA_URL).origin;
+  // the bucket the site is built against: VITE_DATA_URL (import.meta.env is undefined under tsx), else the default
+  const origin = (process.env.VITE_DATA_URL || DATA_HOST).replace(/\/$/, "");
   const problems = [];
   for (const f of files) {
     const res = await fetch(`${origin}/${f.key}`, { method: "HEAD", headers: { Origin: "https://example.org" } });

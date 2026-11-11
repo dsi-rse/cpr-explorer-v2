@@ -10,7 +10,8 @@ import {
   Typography,
 } from "@mui/material";
 import { getDb, query } from "../utils/db";
-import { DATA_URL, mapQuery, type Geo, type Params } from "../utils/queries";
+import { mapQuery, type Geo, type Params } from "../utils/queries";
+import { DATA_URL } from "../manifest";
 
 // Live check of the explorer's numbers against CalPIP query exports in public/groundtruth/csv_records.
 // Each comparison runs the same map query the explorer runs, in the browser, against the current data.
@@ -77,7 +78,7 @@ const runComparison = async (c: Comparison): Promise<Result> => {
   // no join key: joining on null matches nothing, so r² comes back null
   const [ourKey, truthKey] = c.join ?? ["null", "null"];
   const [row] = await query(`with
-    o as (select ${ourKey} k, lbs_chm_used chm, lbs_prd_used prd from (${mapQuery(c.geo, c.params)})),
+    o as (select ${ourKey} k, lbs_chm_used chm, lbs_prd_used prd from (${mapQuery(c.geo, c.params, DATA_URL)})),
     t as (select ${truthKey} k, sum(${tc}) chm, sum(${tp}) prd
           from read_csv('${c.file}.txt', delim='\\t', nullstr='N/A', header=true) group by k),
     j as (select o.chm oc, t.chm tc, o.prd op, t.prd tp from o join t using (k))

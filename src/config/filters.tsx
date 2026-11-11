@@ -1,4 +1,4 @@
-import { END_YEAR, START_YEAR } from "../dates";
+import { END_YEAR, START_YEAR } from "../manifest";
 import { type FilterSpec } from "../types/state";
 
 export type FilterValue = string | string[] | number | number[] | null;

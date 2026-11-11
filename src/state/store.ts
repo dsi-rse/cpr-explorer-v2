@@ -11,6 +11,7 @@ import { infillTimeseries } from "../utils/timeseries";
 import { wrapper } from "../utils/stateUtils";
 import { findExistingFilter } from "../utils/findExistingFilter";
 import { buildParams, mapQuery, timeseriesQuery } from "../utils/queries";
+import { DATA_URL } from "../manifest";
 import { query } from "../utils/db";
 import { deepCloneRecords } from "../utils/deepCloneRecords";
 import {
@@ -319,10 +320,11 @@ export const useStore = create<State>(
         const params = buildParams(uiFilters, filterKeys);
         let data = await query(
           view === "timeseries"
-            ? timeseriesQuery(timeseriesConfig!.series, params)
+            ? timeseriesQuery(timeseriesConfig!.series, params, DATA_URL)
             : mapQuery(
                 getMapConfig(view).find((c) => c.layer === geography)!.geo,
-                params
+                params,
+                DATA_URL
               )
         );
         // superseded by a newer query, or the filters/layer changed while this one ran (the UI shows "apply changes")
